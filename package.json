@@ -1,0 +1,11 @@
+{
+  "name": "chat_tutorial",
+  "version": "0.0.0",
+  "description": "Following the [chat tutorial](http://socket.io/get-started/chat/) on Socket.IO's website.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
