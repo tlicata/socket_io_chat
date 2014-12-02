@@ -1,8 +1,22 @@
-var express = require("express");
-var app = express();
+var express = require("express")
+var http = require("http");
+var socket = require("socket.io");
 
-app.get("/", function (req, res) {
+var app = express();
+var server = http.Server(app);
+var io = socket(server);
+
+app.get("/", function(req, res){
   res.sendFile(__dirname + "/index.html");
 });
 
-app.listen(3000);
+io.on("connection", function(socket){
+  console.log("a user connected");
+  socket.on("disconnect", function () {
+    console.log("a user disconnected");
+  });
+});
+
+server.listen(3000, function(){
+  console.log("listening on *:3000");
+});
