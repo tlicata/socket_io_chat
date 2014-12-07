@@ -24,15 +24,18 @@
     <script>
       var socket = io();
       var nickname = prompt("enter your nickname");
+      var appendMsg = function (msg) {
+        $("#messages").append($("<li>").text(msg));
+      };
       socket.emit("nickname", nickname);
       $("form").on("submit", function () {
-        socket.emit("chat message", $("#m").val());
+        var msg = $("#m").val();
+        socket.emit("chat message", msg);
+        appendMsg(nickname + ": " + msg);
         $("#m").val("");
         return false;
       });
-      socket.on("chat message", function (msg) {
-        $("#messages").append($("<li>").text(msg));
-      });
+      socket.on("chat message", appendMsg);
       socket.on("connect message", function (msg) {
         $("#messages").append($("<li>").text(msg).addClass("connect"));
       });
