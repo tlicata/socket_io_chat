@@ -12,14 +12,18 @@ app.get("/", function(req, res){
 
 io.on("connection", function(socket){
   console.log("a user connected");
-  socket.broadcast.emit("connect message", "a user connected");
+  var nickname = "anonymous user";
+  socket.on("nickname", function (nick) {
+    nickname = nick || nickname;
+    socket.broadcast.emit("connect message", nickname + " connected");
+  });
   socket.on("chat message", function (msg) {
     console.log("message: " + msg);
-    io.emit("chat message", msg);
+    io.emit("chat message", nickname + ": " + msg);
   });
   socket.on("disconnect", function () {
     console.log("a user disconnected");
-    socket.broadcast.emit("connect message", "a user disconnected");
+    socket.broadcast.emit("connect message", nickname + " disconnected");
   });
 });
 
