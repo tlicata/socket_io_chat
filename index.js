@@ -10,19 +10,27 @@ var passport = require("passport");
 var session = require("express-session");
 var LocalStrategy = require("passport-local").Strategy;
 
+// ------------------
+// Middleware Helpers
+// ------------------
+var sessionMiddleware = session({
+  secret: "session secret",
+  resave: false,
+  saveUninitialized: true
+})
+
 // ----------
 // Middleware
 // ----------
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(session({
-  secret: "session secret",
-  resave: false,
-  saveUninitialized: true
-}));
+app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
+io.use(function (socket, next) {
+  sessionMiddleware(socket.request, {}, next);
+});
 
 // ----------------
 // Passport Helpers
