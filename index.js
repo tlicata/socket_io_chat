@@ -10,19 +10,27 @@ var passport = require("passport");
 var session = require("express-session");
 var LocalStrategy = require("passport-local").Strategy;
 
+// ------------------
+// Middleware Helpers
+// ------------------
+var sessionMiddleware = session({
+  secret: "session secret",
+  resave: false,
+  saveUninitialized: true
+})
+
 // ----------
 // Middleware
 // ----------
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(session({
-  secret: "session secret",
-  resave: false,
-  saveUninitialized: true
-}));
+app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
+io.use(function (socket, next) {
+  sessionMiddleware(socket.request, {}, next);
+});
 
 // ----------------
 // Passport Helpers
@@ -122,14 +130,31 @@ app.get("/", isLoggedIn, function(req, res){
 
 io.on("connection", function(socket){
   console.log("a user connected");
-  socket.broadcast.emit("connect message", "a user connected");
+  var nickname = "anonymous user";
+
+  var sendConnectMessage = function () {
+    socket.broadcast.emit("connect message", nickname + " connected");
+  };
+  if (socket.request.session.passport) {
+    var userId = socket.request.session.passport.user;
+    if (userId) {
+      db.User.find(userId).then(function (user) {
+        nickname = user.username;
+        sendConnectMessage();
+      }).catch(sendConnectMessage);
+    } else {
+      sendConnectMessage();
+    }
+  } else {
+    sendConnectMessage();
+  }
   socket.on("chat message", function (msg) {
     console.log("message: " + msg);
-    io.emit("chat message", msg);
+    io.emit("chat message", nickname + ": " + msg);
   });
   socket.on("disconnect", function () {
     console.log("a user disconnected");
-    socket.broadcast.emit("connect message", "a user disconnected");
+    socket.broadcast.emit("connect message", nickname + " disconnected");
   });
 });
 
