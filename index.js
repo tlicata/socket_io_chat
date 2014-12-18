@@ -17,7 +17,7 @@ var sessionMiddleware = session({
   secret: "session secret",
   resave: false,
   saveUninitialized: true
-})
+});
 
 // ----------
 // Middleware
